@@ -396,6 +396,11 @@
             "minScale": 0.3,
             "maxScale": 5
           }
+        },
+        "b3d9e4c7-8a21-4f6d-90c5-1e7b2a8d4f63": {
+          "id": "b3d9e4c7-8a21-4f6d-90c5-1e7b2a8d4f63",
+          "name": "twist-to-rotate",
+          "parameters": {}
         }
       },
       "name": "Model",
