@@ -1,16 +1,8 @@
-# Studio: World Effects
+# gs-hallow-ar.github.io
 
-This project demonstrates how to use World Effects to anchor virtual content to a flat surface.
+Trick or treat! Halloween AR static page featuring an interactive 3D skeleton.
 
-![Preview of the world effects project open in the editor](./src/assets/preview.jpg)
-
-<details><summary>Try it out</summary>
-
-https://8thwall.org/studio-world-effects-example/
-
-<img alt="QR Code for the preview link" src="https://8th.io/qr?v=2&url=https://8thwall.org/studio-world-effects-example/" width=250 height=250 />
-
-</details>
+![Preview of the Halloween AR project](./src/assets/preview.jpg)
 
 ## Usage
 
@@ -23,9 +15,15 @@ https://8thwall.org/studio-world-effects-example/
 
 ## Deployment
 
-This project contains Github Actions configuration for deployment to Github Pages, which triggers automatically by pushing the `main` branch. You can also follow the publishing instructions here: https://8thwall.org/docs/getting-started/publishing to publish to any other web host.
+This project contains Github Actions configuration for deployment to Github Pages, which triggers automatically by pushing the `main` branch.
+
+## Features
+
+- **Place**: Tap the ground to place a skeleton
+- **Drag**: Touch and drag to move the skeleton around
+- **Scale**: Pinch to resize the skeleton (0.3x to 5x)
+- **Reset**: Clear the scene and place a new one
 
 ## Questions?
 
 Please raise any questions on [Github Discussions](https://github.com/orgs/8thwall/discussions) or join the [Discord](https://8th.io/discord) to connect with the community.
-
