@@ -8,9 +8,9 @@ export interface Creature {
 const CREATURES: Creature[] = [
   {
     label: 'Skeleton',
-    url: './assets/curious_skeleton.glb',
+    url: './assets/skeleton.glb',
     icon: './assets/skeleton.png',
-    scale: 0.0086,
+    scale: 0.4576,
   },
   {
     label: 'Ghost',
