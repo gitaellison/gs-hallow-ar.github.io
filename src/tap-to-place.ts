@@ -3,16 +3,13 @@ import {Logo} from './logo'
 import {DragToMove} from './drag-to-move'
 import {PinchToScale} from './pinch-to-scale'
 import {TwistToRotate} from './twist-to-rotate'
-import {getSelectedCreature} from './creature-picker'
+import {getSelectedCreature, isPlaced, markPlaced} from './creature-picker'
 
 const OBJECT_PLACED_EVENT = 'object-placed'
 const OBJECT_REMOVED_EVENT = 'object-removed'
 
 ecs.registerComponent({
   name: 'tap-to-place',
-  schema: {
-    prefab: 'eid',
-  },
   stateMachine: ({world, eid, defineState}) => {
     defineState('idle').initial().listen(eid, ecs.input.SCREEN_TOUCH_START, (e) => {
       if (!e.data.worldPosition) {
@@ -20,6 +17,10 @@ ecs.registerComponent({
       }
 
       const creature = getSelectedCreature()
+      if (isPlaced(creature.url)) {
+        return
+      }
+      markPlaced(creature.url)
       const root = world.createEntity()
       world.getEntity(root).set(Logo, {})
 

@@ -1,6 +1,7 @@
 import * as ecs from '@8thwall/ecs'
 import { Logo } from './logo'
 import { OBJECT_PLACED_EVENT, OBJECT_REMOVED_EVENT } from './tap-to-place'
+import { clearPlaced } from './creature-picker'
 
 const logoQuery = ecs.defineQuery([Logo])
 
@@ -40,6 +41,7 @@ ecs.registerComponent({
         logoQuery(world).forEach(e => {
           world.deleteEntity(e)
         })
+        clearPlaced()
         world.events.dispatch(world.events.globalId, OBJECT_REMOVED_EVENT)
       })
   }

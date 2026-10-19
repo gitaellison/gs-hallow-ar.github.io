@@ -1,14 +1,12 @@
 import * as ecs from '@8thwall/ecs'
 
-const DRAG_PLANE_Y = 0
-
 const DragToMove = ecs.registerComponent({
   name: 'drag-to-move',
   stateMachine: ({world, eid, defineState}) => {
     let activePointerId: number | null = null
     let grabOffset = ecs.math.vec3.zero()
 
-    const screenPointOnGroundPlane = (position: {x: number; y: number}) => {
+    const screenPointOnPlane = (position: {x: number; y: number}, planeY: number) => {
       const THREE = (window as any).THREE
       const camera = world.three.activeCamera
       if (!THREE || !camera) return null
@@ -21,10 +19,10 @@ const DragToMove = ecs.registerComponent({
       const direction = ray.direction
       if (Math.abs(direction.y) < 1e-6) return null
 
-      const t = (DRAG_PLANE_Y - origin.y) / direction.y
+      const t = (planeY - origin.y) / direction.y
       if (t <= 0) return null
 
-      return ecs.math.vec3.xyz(origin.x + direction.x * t, DRAG_PLANE_Y, origin.z + direction.z * t)
+      return ecs.math.vec3.xyz(origin.x + direction.x * t, planeY, origin.z + direction.z * t)
     }
 
     defineState('idle').initial()
@@ -34,26 +32,24 @@ const DragToMove = ecs.registerComponent({
       .listen(eid, ecs.input.SCREEN_TOUCH_START, (e) => {
         if (activePointerId !== null || !e.data.worldPosition) return
 
-        const grabPoint = screenPointOnGroundPlane(e.data.position)
+        const startPos = world.transform.getWorldPosition(eid)
+        const grabPoint = screenPointOnPlane(e.data.position, startPos.y)
         if (grabPoint === null) return
 
-        const skeletonPos = ecs.math.vec3.zero()
-        world.transform.getWorldPosition(eid, skeletonPos)
         grabOffset = ecs.math.vec3.xyz(
-          skeletonPos.x - grabPoint.x,
+          startPos.x - grabPoint.x,
           0,
-          skeletonPos.z - grabPoint.z
+          startPos.z - grabPoint.z
         )
         activePointerId = e.data.pointerId
       })
       .listen(eid, ecs.input.SCREEN_TOUCH_MOVE, (e) => {
         if (activePointerId === null || e.data.pointerId !== activePointerId) return
 
-        const grabPoint = screenPointOnGroundPlane(e.data.position)
+        const skeletonPos = world.transform.getWorldPosition(eid)
+        const grabPoint = screenPointOnPlane(e.data.position, skeletonPos.y)
         if (grabPoint === null) return
 
-        const skeletonPos = ecs.math.vec3.zero()
-        world.transform.getWorldPosition(eid, skeletonPos)
         world.transform.setWorldPosition(
           eid,
           ecs.math.vec3.xyz(

@@ -1,89 +1,44 @@
-import * as THREE from 'three'
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
-
 export interface Creature {
   label: string
   url: string
+  icon: string
   scale: number
 }
 
 const CREATURES: Creature[] = [
-  {label: 'Skeleton', url: './assets/full-adult-skeleton-standing.glb', scale: 0.85},
-  {label: 'Curious', url: './assets/curious_skeleton.glb', scale: 1},
-  {label: 'Ghost', url: './assets/halloween_ghost.glb', scale: 1},
-  {label: 'Knight', url: './assets/halloween_pumpkin_lantern_knight.glb', scale: 1},
-  {label: 'Pumpkin', url: './assets/jack-o-lantern.glb', scale: 1},
-  {label: 'Cat', url: './assets/the_halloween_cat.glb', scale: 1},
+  {
+    label: 'Skeleton',
+    url: './assets/curious_skeleton.glb',
+    icon: './assets/skeleton.png',
+    scale: 0.009,
+  },
+  {
+    label: 'Ghost',
+    url: './assets/halloween_ghost.glb',
+    icon: './assets/ghost.png',
+    scale: 0.32,
+  },
+  {
+    label: 'Knight',
+    url: './assets/halloween_pumpkin_lantern_knight.glb',
+    icon: './assets/pumkinknight.png',
+    scale: 0.006,
+  },
 ]
 
-const TARGET_HEIGHT = 1.6
-const ICON_SIZE = 88
-
 let selectedIndex = 0
+const placedUrls = new Set<string>()
+let refreshUI: () => void = () => {}
 
 export const getSelectedCreature = (): Creature => CREATURES[selectedIndex]
-
-const renderIcon = (
-  renderer: THREE.WebGLRenderer,
-  loader: GLTFLoader,
-  creature: Creature,
-  img: HTMLImageElement
-) => {
-  loader.load(
-    creature.url,
-    (gltf) => {
-      const model = gltf.scene
-      model.traverse((obj) => {
-        if ((obj as THREE.Mesh).isMesh) {
-          obj.frustumCulled = false
-        }
-      })
-
-      const box = new THREE.Box3().setFromObject(model)
-      const size = box.getSize(new THREE.Vector3())
-      const center = box.getCenter(new THREE.Vector3())
-      const maxDim = Math.max(size.x, size.y, size.z)
-      if (maxDim > 0) {
-        creature.scale = Math.min(5, Math.max(0.2, TARGET_HEIGHT / maxDim))
-      }
-
-      const scene = new THREE.Scene()
-      scene.add(model)
-      scene.add(new THREE.AmbientLight(0xffffff, 1.4))
-      const key = new THREE.DirectionalLight(0xffffff, 2.2)
-      key.position.set(1, 2, 1.5)
-      scene.add(key)
-      const rim = new THREE.DirectionalLight(0xbfd4ff, 1.2)
-      rim.position.set(-1.5, 0.8, -1.2)
-      scene.add(rim)
-
-      const camera = new THREE.PerspectiveCamera(40, 1, 0.01, maxDim * 20)
-      const dir = new THREE.Vector3(1, 0.5, 1).normalize().multiplyScalar(maxDim * 2.2)
-      camera.position.copy(center).add(dir)
-      camera.lookAt(center)
-
-      renderer.setSize(ICON_SIZE, ICON_SIZE)
-      renderer.setClearColor(0x000000, 0)
-      renderer.render(scene, camera)
-      img.src = renderer.domElement.toDataURL()
-      img.style.opacity = '1'
-
-      model.traverse((obj) => {
-        const mesh = obj as THREE.Mesh
-        if (mesh.isMesh) {
-          mesh.geometry?.dispose()
-          const mat = mesh.material
-          if (Array.isArray(mat)) {
-            mat.forEach((m) => m.dispose())
-          } else if (mat) {
-            mat.dispose()
-          }
-        }
-      })
-    },
-    undefined,
-    (err) => console.warn('creature icon failed', creature.url, err)
-  )
+export const isPlaced = (url: string): boolean => placedUrls.has(url)
+export const markPlaced = (url: string) => {
+  placedUrls.add(url)
+  refreshUI()
+}
+export const clearPlaced = () => {
+  placedUrls.clear()
+  refreshUI()
 }
 
 const buildPicker = () => {
@@ -117,15 +72,8 @@ const buildPicker = () => {
   bar.addEventListener('pointercancel', stop)
   bar.addEventListener('click', stop)
 
-  const renderer = new THREE.WebGLRenderer({
-    alpha: true,
-    antialias: true,
-    preserveDrawingBuffer: true,
-  })
-  renderer.setSize(ICON_SIZE, ICON_SIZE)
-  const loader = new GLTFLoader()
-
   const buttons: HTMLElement[] = []
+  const icons: HTMLElement[] = []
 
   const updateSelection = () => {
     buttons.forEach((btn, i) => {
@@ -134,6 +82,7 @@ const buildPicker = () => {
       btn.style.border = selected
         ? '2px solid #ffd166'
         : '2px solid rgba(255, 255, 255, 0.25)'
+      btn.style.opacity = isPlaced(CREATURES[i].url) ? '0.55' : '1'
     })
   }
 
@@ -141,7 +90,7 @@ const buildPicker = () => {
     const btn = document.createElement('div')
     Object.assign(btn.style, {
       flex: '0 0 auto',
-      width: '76px',
+      width: '88px',
       padding: '6px 4px 4px',
       borderRadius: '14px',
       display: 'flex',
@@ -149,18 +98,18 @@ const buildPicker = () => {
       alignItems: 'center',
       gap: '2px',
       cursor: 'pointer',
-      transition: 'background 0.15s ease',
+      transition: 'background 0.15s ease, opacity 0.15s ease',
     } as Partial<CSSStyleDeclaration>)
 
     const icon = document.createElement('img')
     Object.assign(icon.style, {
-      width: `${ICON_SIZE - 20}px`,
-      height: `${ICON_SIZE - 20}px`,
+      width: '64px',
+      height: '64px',
       objectFit: 'contain',
-      opacity: '0',
-      transition: 'opacity 0.25s ease',
       pointerEvents: 'none',
     } as Partial<CSSStyleDeclaration>)
+    icon.src = creature.icon
+    icon.alt = creature.label
 
     const label = document.createElement('span')
     label.textContent = creature.label
@@ -179,11 +128,11 @@ const buildPicker = () => {
     btn.append(icon, label)
     bar.appendChild(btn)
     buttons.push(btn)
-
-    setTimeout(() => renderIcon(renderer, loader, creature, icon), 600 * i)
+    icons.push(icon)
   })
 
   updateSelection()
+  refreshUI = updateSelection
   document.body.appendChild(bar)
 }
 
