@@ -29,6 +29,7 @@ const CREATURES: Creature[] = [
 let selectedIndex = 0
 const placedUrls = new Set<string>()
 let refreshUI: () => void = () => {}
+let pickerBar: HTMLDivElement | null = null
 
 export const getSelectedCreature = (): Creature => CREATURES[selectedIndex]
 export const isPlaced = (url: string): boolean => placedUrls.has(url)
@@ -133,7 +134,24 @@ const buildPicker = () => {
 
   updateSelection()
   refreshUI = updateSelection
+  bar.style.display = 'none'
+  pickerBar = bar
   document.body.appendChild(bar)
+}
+
+const setPickerVisible = (visible: boolean) => {
+  if (pickerBar !== null) {
+    pickerBar.style.display = visible ? 'flex' : 'none'
+  }
+}
+
+const onxrloaded = () => {
+  const XR8 = (window as any).XR8
+  XR8.addCameraPipelineModule({
+    name: 'creature-picker-gate',
+    onStart: () => setPickerVisible(true),
+    onExit: () => setPickerVisible(false),
+  })
 }
 
 if (document.body) {
@@ -142,4 +160,8 @@ if (document.body) {
   document.addEventListener('DOMContentLoaded', buildPicker)
 }
 
-export {}
+if ((window as any).XR8) {
+  onxrloaded()
+} else {
+  window.addEventListener('xrloaded', onxrloaded)
+}
