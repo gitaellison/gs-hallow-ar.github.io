@@ -4,6 +4,7 @@ import {DragToMove} from './drag-to-move'
 import {PinchToScale} from './pinch-to-scale'
 import {TwistToRotate} from './twist-to-rotate'
 import {getSelectedCreature, isPlaced, markPlaced} from './creature-picker'
+import {CastShadows} from './cast-shadows'
 
 const OBJECT_PLACED_EVENT = 'object-placed'
 const OBJECT_REMOVED_EVENT = 'object-removed'
@@ -31,6 +32,7 @@ ecs.registerComponent({
       modelEntity.set(DragToMove, {})
       modelEntity.set(PinchToScale, {})
       modelEntity.set(TwistToRotate, {})
+      modelEntity.set(CastShadows, {})
 
       ecs.PositionAnimation.set(world, model, {
         duration: 2000,
