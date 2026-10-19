@@ -10,19 +10,19 @@ const CREATURES: Creature[] = [
     label: 'Skeleton',
     url: './assets/curious_skeleton.glb',
     icon: './assets/skeleton.png',
-    scale: 0.009,
+    scale: 0.0086,
   },
   {
     label: 'Ghost',
-    url: './assets/halloween_ghost.glb',
+    url: './assets/ghost.glb',
     icon: './assets/ghost.png',
-    scale: 0.32,
+    scale: 0.0114,
   },
   {
-    label: 'Knight',
-    url: './assets/halloween_pumpkin_lantern_knight.glb',
+    label: 'Pumpkin',
+    url: './assets/halloween_pumpkin.glb',
     icon: './assets/pumkinknight.png',
-    scale: 0.006,
+    scale: 0.0059,
   },
 ]
 
