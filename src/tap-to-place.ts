@@ -1,4 +1,9 @@
 import * as ecs from '@8thwall/ecs'
+import {Logo} from './logo'
+import {DragToMove} from './drag-to-move'
+import {PinchToScale} from './pinch-to-scale'
+import {TwistToRotate} from './twist-to-rotate'
+import {getSelectedCreature} from './creature-picker'
 
 const OBJECT_PLACED_EVENT = 'object-placed'
 const OBJECT_REMOVED_EVENT = 'object-removed'
@@ -8,30 +13,40 @@ ecs.registerComponent({
   schema: {
     prefab: 'eid',
   },
-  stateMachine: ({world, eid, schemaAttribute, defineState}) => {
-    let placed = false
+  stateMachine: ({world, eid, defineState}) => {
+    defineState('idle').initial().listen(eid, ecs.input.SCREEN_TOUCH_START, (e) => {
+      if (!e.data.worldPosition) {
+        return
+      }
 
-    defineState('placing')
-      .initial()
-      .onEnter(() => {
-        placed = false
-      })
-      .onEvent(OBJECT_PLACED_EVENT, 'placed', {target: world.events.globalId})
-      .listen(eid, ecs.input.SCREEN_TOUCH_START, (e) => {
-        if (placed || !e.data.worldPosition) {
-          return
-        }
-        const newEid = world.createEntity(schemaAttribute.get(eid).prefab)
-        const pos = e.data.worldPosition
-        world.setPosition(newEid, pos.x, pos.y, pos.z)
-        const quat = ecs.math.quat.yRadians(Math.random() * Math.PI)
-        world.setQuaternion(newEid, quat.x, quat.y, quat.z, quat.w)
-        placed = true
-        world.events.dispatch(world.events.globalId, OBJECT_PLACED_EVENT)
+      const creature = getSelectedCreature()
+      const root = world.createEntity()
+      world.getEntity(root).set(Logo, {})
+
+      const model = world.createEntity()
+      const modelEntity = world.getEntity(model)
+      modelEntity.setParent(root)
+      modelEntity.set(ecs.GltfModel, {url: creature.url, animationClip: '', loop: true})
+      modelEntity.set(DragToMove, {})
+      modelEntity.set(PinchToScale, {})
+      modelEntity.set(TwistToRotate, {})
+
+      ecs.PositionAnimation.set(world, model, {
+        duration: 2000,
+        loop: false,
+        fromY: -2,
+        toY: 0,
+        easeOut: true,
+        easingFunction: 'Elastic',
       })
 
-    defineState('placed').onEvent(OBJECT_REMOVED_EVENT, 'placing', {
-      target: world.events.globalId,
+      const pos = e.data.worldPosition
+      world.setPosition(root, pos.x, pos.y, pos.z)
+      const quat = ecs.math.quat.yRadians(Math.random() * Math.PI)
+      world.setQuaternion(root, quat.x, quat.y, quat.z, quat.w)
+      world.setScale(model, creature.scale, creature.scale, creature.scale)
+
+      world.events.dispatch(world.events.globalId, OBJECT_PLACED_EVENT)
     })
   },
 })

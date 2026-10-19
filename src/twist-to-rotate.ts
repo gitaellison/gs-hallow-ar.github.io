@@ -1,6 +1,6 @@
 import * as ecs from '@8thwall/ecs'
 
-ecs.registerComponent({
+const TwistToRotate = ecs.registerComponent({
   name: 'twist-to-rotate',
   stateMachine: ({world, eid, defineState}) => {
     const pointers = new Map<number, {x: number; y: number}>()
@@ -75,4 +75,6 @@ ecs.registerComponent({
   },
 })
 
-export {}
+
+
+export {TwistToRotate}

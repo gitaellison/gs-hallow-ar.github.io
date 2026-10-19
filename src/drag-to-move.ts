@@ -2,7 +2,7 @@ import * as ecs from '@8thwall/ecs'
 
 const DRAG_PLANE_Y = 0
 
-ecs.registerComponent({
+const DragToMove = ecs.registerComponent({
   name: 'drag-to-move',
   stateMachine: ({world, eid, defineState}) => {
     let activePointerId: number | null = null
@@ -71,4 +71,6 @@ ecs.registerComponent({
   },
 })
 
-export {}
+
+
+export {DragToMove}

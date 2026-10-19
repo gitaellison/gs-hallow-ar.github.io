@@ -1,6 +1,6 @@
 import * as ecs from '@8thwall/ecs'
 
-ecs.registerComponent({
+const PinchToScale = ecs.registerComponent({
   name: 'pinch-to-scale',
   schema: {
     minScale: ['f32', 0.3],
@@ -39,4 +39,6 @@ ecs.registerComponent({
   },
 })
 
-export {}
+
+
+export {PinchToScale}
