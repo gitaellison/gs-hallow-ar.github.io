@@ -28,8 +28,8 @@ const PinchToScale = ecs.registerComponent({
 
         const {minScale, maxScale} = schemaAttribute.get(eid)
         const newScale = Math.max(
-          minScale,
-          Math.min(maxScale, baseScale * (e.data.spread / initialSpread))
+          baseScale * minScale,
+          Math.min(baseScale * maxScale, baseScale * (e.data.spread / initialSpread))
         )
         world.setScale(eid, newScale, newScale, newScale)
       })
