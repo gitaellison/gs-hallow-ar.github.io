@@ -1,4 +1,5 @@
 import * as ecs from '@8thwall/ecs'
+import {setActiveCreature} from './interaction-state'
 
 const DragToMove = ecs.registerComponent({
   name: 'drag-to-move',
@@ -27,8 +28,8 @@ const DragToMove = ecs.registerComponent({
       fwd.normalize()
       const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0))
 
-      const moveX = right.x * -change.x * scale + fwd.x * change.y * scale
-      const moveZ = right.z * -change.x * scale + fwd.z * change.y * scale
+      const moveX = right.x * change.x * scale + fwd.x * -change.y * scale
+      const moveZ = right.z * change.x * scale + fwd.z * -change.y * scale
 
       world.transform.setWorldPosition(
         eid,
@@ -43,6 +44,7 @@ const DragToMove = ecs.registerComponent({
       .listen(eid, ecs.input.SCREEN_TOUCH_START, (e) => {
         if (activePointerId !== null || !e.data.worldPosition) return
         activePointerId = e.data.pointerId
+        setActiveCreature(eid)
       })
       .listen(eid, ecs.input.SCREEN_TOUCH_MOVE, (e) => {
         if (activePointerId === null || e.data.pointerId !== activePointerId) return

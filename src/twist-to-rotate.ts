@@ -1,4 +1,5 @@
 import * as ecs from '@8thwall/ecs'
+import {isActiveCreature} from './interaction-state'
 
 const TwistToRotate = ecs.registerComponent({
   name: 'twist-to-rotate',
@@ -34,7 +35,7 @@ const TwistToRotate = ecs.registerComponent({
     }
 
     function onPointerMove(evt: PointerEvent) {
-      if (!stillAlive()) return
+      if (!stillAlive() || !isActiveCreature(eid)) return
       if (!pointers.has(evt.pointerId)) return
       pointers.set(evt.pointerId, {x: evt.clientX, y: evt.clientY})
 

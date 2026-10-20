@@ -1,4 +1,5 @@
 import * as ecs from '@8thwall/ecs'
+import {isActiveCreature} from './interaction-state'
 
 const PinchToScale = ecs.registerComponent({
   name: 'pinch-to-scale',
@@ -18,13 +19,13 @@ const PinchToScale = ecs.registerComponent({
 
     defineState('idle').initial()
       .listen(world.events.globalId, ecs.input.GESTURE_START, (e) => {
-        if (e.data.touchCount >= 2) {
+        if (e.data.touchCount >= 2 && isActiveCreature(eid)) {
           initialSpread = e.data.spread
           baseScale = currentScale()
         }
       })
       .listen(world.events.globalId, ecs.input.GESTURE_MOVE, (e) => {
-        if (e.data.touchCount < 2 || initialSpread <= 0) return
+        if (e.data.touchCount < 2 || initialSpread <= 0 || !isActiveCreature(eid)) return
 
         const {minScale, maxScale} = schemaAttribute.get(eid)
         const newScale = Math.max(
