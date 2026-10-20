@@ -251,7 +251,13 @@
       "geometry": null,
       "material": null,
       "parentId": "904308fe-98f5-4c93-bf62-f39d50c6e602",
-      "components": {},
+      "components": {
+        "d1a2b3c4-e5f6-4789-abcd-0123456789ab": {
+          "id": "d1a2b3c4-e5f6-4789-abcd-0123456789ab",
+          "name": "capture-hide",
+          "parameters": {}
+        }
+      },
       "ui": {
         "text": "Tap to place creature",
         "width": "100%",
@@ -296,7 +302,13 @@
       "geometry": null,
       "material": null,
       "parentId": "904308fe-98f5-4c93-bf62-f39d50c6e602",
-      "components": {},
+      "components": {
+        "d1a2b3c4-e5f6-4789-abcd-0123456789ab": {
+          "id": "d1a2b3c4-e5f6-4789-abcd-0123456789ab",
+          "name": "capture-hide",
+          "parameters": {}
+        }
+      },
       "ui": {
         "text": "Tap to place creature",
         "width": "100%",

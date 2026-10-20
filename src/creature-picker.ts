@@ -325,7 +325,9 @@ const addCaptureButton = (bar: HTMLElement) => {
     busy = true
     btn.style.opacity = '0.6'
     flashScreen()
+    setPickerVisible(false)
     const blob = await takeScenePhoto()
+    setPickerVisible(true)
     if (blob !== null) {
       showPhotoModal(blob)
     } else {
