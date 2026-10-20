@@ -33,19 +33,32 @@ ecs.registerComponent({
       modelEntity.set(PinchToScale, {})
       modelEntity.set(TwistToRotate, {})
 
-      ecs.PositionAnimation.set(world, model, {
+      const pos = e.data.worldPosition
+      world.setPosition(root, pos.x, pos.y, pos.z)
+
+      ecs.PositionAnimation.set(world, root, {
         duration: 2000,
         loop: false,
-        fromY: -2,
-        toY: 0,
+        fromX: pos.x,
+        fromY: pos.y - 2,
+        fromZ: pos.z,
+        toX: pos.x,
+        toY: pos.y,
+        toZ: pos.z,
         easeOut: true,
         easingFunction: 'Elastic',
       })
 
-      const pos = e.data.worldPosition
-      world.setPosition(root, pos.x, pos.y, pos.z)
-      const quat = ecs.math.quat.yRadians(Math.random() * Math.PI)
-      world.setQuaternion(root, quat.x, quat.y, quat.z, quat.w)
+      const camPos = world.transform.getWorldPosition(world.camera.getActiveEid())
+      const faceYaw = Math.atan2(camPos.x - pos.x, camPos.z - pos.z) + (creature.flip ? Math.PI : 0)
+      const rootQuat = ecs.math.quat.pitchYawRollRadians(
+        ecs.math.vec3.xyz(
+          (creature.fixX * Math.PI) / 180,
+          faceYaw,
+          (creature.fixZ * Math.PI) / 180
+        )
+      )
+      world.setQuaternion(root, rootQuat.x, rootQuat.y, rootQuat.z, rootQuat.w)
       world.setScale(model, creature.scale, creature.scale, creature.scale)
 
       world.events.dispatch(world.events.globalId, OBJECT_PLACED_EVENT)

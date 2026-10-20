@@ -5,10 +5,15 @@ export interface Creature {
   url: string
   icon: string
   scale: number
+  // Rotation corrections in DEGREES to make the model stand upright.
+  // If a creature spawns wrong on device, tweak these (e.g. fixX -90 => 90, or flip true).
+  fixX: number
+  fixZ: number
+  flip: boolean
 }
 
 const CAMERA_SVG =
-  '<svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true">' +
+  '<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">' +
   '<path fill="#ffffff" d="M9.2 3 7.4 5H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.4l-1.8-2H9.2zM12 8a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zm0 2.2a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6z"/></svg>'
 
 const CREATURES: Creature[] = [
@@ -17,24 +22,36 @@ const CREATURES: Creature[] = [
     url: './assets/skeleton.glb',
     icon: './assets/skeleton.png',
     scale: 1.0296,
+    fixX: -90,
+    fixZ: 0,
+    flip: false,
   },
   {
     label: 'Ghost',
     url: './assets/ghost.glb',
     icon: './assets/ghost.png',
     scale: 0.9324,
+    fixX: -90,
+    fixZ: 0,
+    flip: false,
   },
   {
     label: 'Pumpkin',
     url: './assets/halloween_pumpkin.glb',
     icon: './assets/pumpkin.png',
     scale: 0.0133,
+    fixX: -90,
+    fixZ: 0,
+    flip: false,
   },
   {
     label: 'Halloween',
     url: './assets/halloween_minecraft_logo.glb',
     icon: './assets/halloween.png',
-    scale: 0.2169,
+    scale: 0.325,
+    fixX: -90,
+    fixZ: 0,
+    flip: false,
   },
 ]
 
@@ -63,7 +80,7 @@ const buildPicker = () => {
     bottom: '0',
     zIndex: '1000',
     display: 'flex',
-    gap: '8px',
+    gap: '6px',
     overflowX: 'auto',
     justifyContent: 'center',
     alignItems: 'flex-start',
@@ -103,9 +120,9 @@ const buildPicker = () => {
     const btn = document.createElement('div')
     Object.assign(btn.style, {
       flex: '0 0 auto',
-      width: '88px',
-      padding: '6px 4px 4px',
-      borderRadius: '14px',
+      width: '66px',
+      padding: '5px 3px 3px',
+      borderRadius: '12px',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -116,8 +133,8 @@ const buildPicker = () => {
 
     const icon = document.createElement('img')
     Object.assign(icon.style, {
-      width: '64px',
-      height: '64px',
+      width: '46px',
+      height: '46px',
       objectFit: 'contain',
       pointerEvents: 'none',
     } as Partial<CSSStyleDeclaration>)
@@ -128,7 +145,7 @@ const buildPicker = () => {
     label.textContent = creature.label
     Object.assign(label.style, {
       color: '#ffffff',
-      fontSize: '11px',
+      fontSize: '10px',
       lineHeight: '1',
       textShadow: '0 1px 2px rgba(0,0,0,0.8)',
     } as Partial<CSSStyleDeclaration>)
@@ -204,10 +221,8 @@ const showPhotoModal = (blob: Blob) => {
     gap: '12px',
   } as Partial<CSSStyleDeclaration>)
 
-  const save = document.createElement('a')
-  save.textContent = 'Save / Share'
-  save.href = url
-  save.download = 'halloween-ar-scene.png'
+  const save = document.createElement('div')
+  save.textContent = 'Save'
   Object.assign(save.style, {
     padding: '12px 22px',
     borderRadius: '12px',
@@ -215,9 +230,36 @@ const showPhotoModal = (blob: Blob) => {
     color: '#ffffff',
     fontWeight: '700',
     fontSize: '16px',
-    textDecoration: 'none',
+    cursor: 'pointer',
     border: '2px solid #ffd166',
+    userSelect: 'none',
   } as Partial<CSSStyleDeclaration>)
+
+  const fallbackDownload = () => {
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'halloween-ar-scene.png'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+  }
+
+  save.addEventListener('click', async (e) => {
+    e.stopPropagation()
+    const file = new File([blob], 'halloween-ar-scene.png', {type: blob.type || 'image/png'})
+    const shareData = {files: [file], title: 'Halloween AR Scene'}
+    try {
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData)
+      } else {
+        fallbackDownload()
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        fallbackDownload()
+      }
+    }
+  })
 
   const close = document.createElement('div')
   close.textContent = 'Close'
@@ -250,9 +292,9 @@ const addCaptureButton = (bar: HTMLElement) => {
   const btn = document.createElement('div')
   Object.assign(btn.style, {
     flex: '0 0 auto',
-    width: '88px',
-    padding: '6px 4px 4px',
-    borderRadius: '14px',
+    width: '66px',
+    padding: '5px 3px 3px',
+    borderRadius: '12px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -265,8 +307,8 @@ const addCaptureButton = (bar: HTMLElement) => {
   const icon = document.createElement('div')
   icon.innerHTML = CAMERA_SVG
   Object.assign(icon.style, {
-    width: '64px',
-    height: '64px',
+    width: '46px',
+    height: '46px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
