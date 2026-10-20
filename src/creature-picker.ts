@@ -26,7 +26,7 @@ const CREATURES: Creature[] = [
     scale: 1.0296,
     fixX: -90,
     fixZ: 0,
-    yawOffset: 90,
+    yawOffset: 0,
     flip: false,
   },
   {
