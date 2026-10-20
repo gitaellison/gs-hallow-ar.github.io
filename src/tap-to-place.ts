@@ -50,7 +50,10 @@ ecs.registerComponent({
       })
 
       const camPos = world.transform.getWorldPosition(world.camera.getActiveEid())
-      const faceYaw = Math.atan2(camPos.x - pos.x, camPos.z - pos.z) + (creature.flip ? Math.PI : 0)
+      const faceYaw =
+        Math.atan2(camPos.x - pos.x, camPos.z - pos.z) +
+        (creature.yawOffset * Math.PI) / 180 +
+        (creature.flip ? Math.PI : 0)
 
       // Stand the model upright locally (tilt about X then Z), then yaw about
       // the world Y axis to face the camera. Composition order: yaw * tilt.

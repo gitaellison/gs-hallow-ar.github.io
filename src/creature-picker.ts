@@ -5,10 +5,12 @@ export interface Creature {
   url: string
   icon: string
   scale: number
-  // Rotation corrections in DEGREES to make the model stand upright.
-  // If a creature spawns wrong on device, tweak these (e.g. fixX -90 => 90, or flip true).
+  // Rotation corrections in DEGREES. fixX/fixZ tilt the model upright at spawn;
+  // yawOffset biases the camera-facing turn (90 = turn a further quarter turn);
+  // flip adds 180 if the model faces away.
   fixX: number
   fixZ: number
+  yawOffset: number
   flip: boolean
 }
 
@@ -24,6 +26,7 @@ const CREATURES: Creature[] = [
     scale: 1.0296,
     fixX: -90,
     fixZ: 0,
+    yawOffset: 90,
     flip: false,
   },
   {
@@ -33,6 +36,7 @@ const CREATURES: Creature[] = [
     scale: 0.9324,
     fixX: -90,
     fixZ: 0,
+    yawOffset: 0,
     flip: false,
   },
   {
@@ -42,16 +46,18 @@ const CREATURES: Creature[] = [
     scale: 0.0133,
     fixX: -90,
     fixZ: 0,
+    yawOffset: 0,
     flip: false,
   },
   {
     label: 'Halloween',
-    url: './assets/halloween_minecraft_logo.glb',
+    url: './assets/happy_halloween_2021.glb',
     icon: './assets/halloween.png',
-    scale: 0.325,
-    fixX: -90,
+    scale: 0.0403,
+    fixX: 0,
     fixZ: 0,
-    flip: true,
+    yawOffset: 90,
+    flip: false,
   },
 ]
 
