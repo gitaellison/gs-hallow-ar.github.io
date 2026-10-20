@@ -26,14 +26,14 @@
         "type": "directional",
         "shadowBias": 0,
         "shadowRadius": 2,
-        "followCamera": false,
+        "followCamera": true,
         "shadowCamera": [
-          -10,
-          10,
-          10,
-          -10,
+          -30,
+          30,
+          30,
+          -30,
           0.5,
-          200
+          120
         ]
       },
       "name": "Directional Light",

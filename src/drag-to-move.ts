@@ -4,25 +4,36 @@ const DragToMove = ecs.registerComponent({
   name: 'drag-to-move',
   stateMachine: ({world, eid, defineState}) => {
     let activePointerId: number | null = null
-    let grabOffset = ecs.math.vec3.zero()
 
-    const screenPointOnPlane = (position: {x: number; y: number}, planeY: number) => {
+    // Camera-relative horizontal drag: map normalized screen deltas onto the
+    // camera's right / forward axes projected on the floor plane. This tracks
+    // naturally for every viewing pitch (screen up/down = depth), instead of
+    // ray-vs-ground-plane which degenerates when holding the phone level.
+    const moveByScreenDelta = (change: {x: number; y: number}) => {
       const THREE = (window as any).THREE
       const camera = world.three.activeCamera
-      if (!THREE || !camera) return null
+      if (!THREE || !camera) return
 
-      const raycaster = new THREE.Raycaster()
-      raycaster.setFromCamera(new THREE.Vector2(position.x * 2 - 1, position.y * -2 + 1), camera)
-      const ray = raycaster.ray
+      const objPos = world.transform.getWorldPosition(eid)
+      const camV = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z)
+      const dist = camV.distanceTo(new THREE.Vector3(objPos.x, objPos.y, objPos.z))
 
-      const origin = ray.origin
-      const direction = ray.direction
-      if (Math.abs(direction.y) < 1e-6) return null
+      const fovRad = ((camera.fov || 60) * Math.PI) / 180
+      const scale = 2 * Math.max(0.3, dist) * Math.tan(fovRad / 2)
 
-      const t = (planeY - origin.y) / direction.y
-      if (t <= 0) return null
+      const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion)
+      fwd.y = 0
+      if (fwd.lengthSq() < 1e-8) return
+      fwd.normalize()
+      const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0))
 
-      return ecs.math.vec3.xyz(origin.x + direction.x * t, planeY, origin.z + direction.z * t)
+      const moveX = right.x * change.x * scale + fwd.x * -change.y * scale
+      const moveZ = right.z * change.x * scale + fwd.z * -change.y * scale
+
+      world.transform.setWorldPosition(
+        eid,
+        ecs.math.vec3.xyz(objPos.x + moveX, objPos.y, objPos.z + moveZ)
+      )
     }
 
     defineState('idle').initial()
@@ -31,33 +42,12 @@ const DragToMove = ecs.registerComponent({
       })
       .listen(eid, ecs.input.SCREEN_TOUCH_START, (e) => {
         if (activePointerId !== null || !e.data.worldPosition) return
-
-        const startPos = world.transform.getWorldPosition(eid)
-        const grabPoint = screenPointOnPlane(e.data.position, startPos.y)
-        if (grabPoint === null) return
-
-        grabOffset = ecs.math.vec3.xyz(
-          startPos.x - grabPoint.x,
-          0,
-          startPos.z - grabPoint.z
-        )
         activePointerId = e.data.pointerId
       })
       .listen(eid, ecs.input.SCREEN_TOUCH_MOVE, (e) => {
         if (activePointerId === null || e.data.pointerId !== activePointerId) return
-
-        const skeletonPos = world.transform.getWorldPosition(eid)
-        const grabPoint = screenPointOnPlane(e.data.position, skeletonPos.y)
-        if (grabPoint === null) return
-
-        world.transform.setWorldPosition(
-          eid,
-          ecs.math.vec3.xyz(
-            grabPoint.x + grabOffset.x,
-            skeletonPos.y,
-            grabPoint.z + grabOffset.z
-          )
-        )
+        if (!e.data.change) return
+        moveByScreenDelta(e.data.change)
       })
       .listen(eid, ecs.input.SCREEN_TOUCH_END, (e) => {
         if (e.data.pointerId === activePointerId) {
@@ -66,7 +56,5 @@ const DragToMove = ecs.registerComponent({
       })
   },
 })
-
-
 
 export {DragToMove}
