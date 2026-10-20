@@ -27,8 +27,8 @@ const DragToMove = ecs.registerComponent({
       fwd.normalize()
       const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0))
 
-      const moveX = right.x * change.x * scale + fwd.x * -change.y * scale
-      const moveZ = right.z * change.x * scale + fwd.z * -change.y * scale
+      const moveX = right.x * -change.x * scale + fwd.x * change.y * scale
+      const moveZ = right.z * -change.x * scale + fwd.z * change.y * scale
 
       world.transform.setWorldPosition(
         eid,

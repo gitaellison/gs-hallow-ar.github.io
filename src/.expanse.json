@@ -358,6 +358,11 @@
           "id": "2100d3e9-8fed-4773-bc39-6f2ca5042375",
           "name": "reset-button",
           "parameters": {}
+        },
+        "d1a2b3c4-e5f6-4789-abcd-0123456789ab": {
+          "id": "d1a2b3c4-e5f6-4789-abcd-0123456789ab",
+          "name": "capture-hide",
+          "parameters": {}
         }
       },
       "ui": {
