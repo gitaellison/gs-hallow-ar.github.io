@@ -51,7 +51,7 @@ const CREATURES: Creature[] = [
     scale: 0.325,
     fixX: -90,
     fixZ: 0,
-    flip: false,
+    flip: true,
   },
 ]
 
@@ -244,21 +244,9 @@ const showPhotoModal = (blob: Blob) => {
     a.remove()
   }
 
-  save.addEventListener('click', async (e) => {
+  save.addEventListener('click', (e) => {
     e.stopPropagation()
-    const file = new File([blob], 'halloween-ar-scene.png', {type: blob.type || 'image/png'})
-    const shareData = {files: [file], title: 'Halloween AR Scene'}
-    try {
-      if (navigator.canShare && navigator.canShare(shareData)) {
-        await navigator.share(shareData)
-      } else {
-        fallbackDownload()
-      }
-    } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
-        fallbackDownload()
-      }
-    }
+    fallbackDownload()
   })
 
   const close = document.createElement('div')

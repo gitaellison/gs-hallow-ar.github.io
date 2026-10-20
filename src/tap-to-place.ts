@@ -51,13 +51,13 @@ ecs.registerComponent({
 
       const camPos = world.transform.getWorldPosition(world.camera.getActiveEid())
       const faceYaw = Math.atan2(camPos.x - pos.x, camPos.z - pos.z) + (creature.flip ? Math.PI : 0)
-      const rootQuat = ecs.math.quat.pitchYawRollRadians(
-        ecs.math.vec3.xyz(
-          (creature.fixX * Math.PI) / 180,
-          faceYaw,
-          (creature.fixZ * Math.PI) / 180
-        )
-      )
+
+      // Stand the model upright locally (tilt about X then Z), then yaw about
+      // the world Y axis to face the camera. Composition order: yaw * tilt.
+      const tilt = ecs.math.quat
+        .xRadians((creature.fixX * Math.PI) / 180)
+        .times(ecs.math.quat.zRadians((creature.fixZ * Math.PI) / 180))
+      const rootQuat = ecs.math.quat.yRadians(faceYaw).times(tilt)
       world.setQuaternion(root, rootQuat.x, rootQuat.y, rootQuat.z, rootQuat.w)
       world.setScale(model, creature.scale, creature.scale, creature.scale)
 
