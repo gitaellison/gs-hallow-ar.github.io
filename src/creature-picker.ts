@@ -5,11 +5,8 @@ export interface Creature {
   url: string
   icon: string
   scale: number
-  // Rotation corrections in DEGREES. fixX/fixZ tilt the model upright at spawn;
-  // yawOffset biases the camera-facing turn (90 = turn a further quarter turn);
-  // flip adds 180 if the model faces away.
-  fixX: number
-  fixZ: number
+  // Spawning rotates the model about the world Y axis to face the camera.
+  // yawOffset biases that turn (degrees); flip adds 180 if it faces away.
   yawOffset: number
   flip: boolean
 }
@@ -24,9 +21,7 @@ const CREATURES: Creature[] = [
     url: './assets/skeleton.glb',
     icon: './assets/skeleton.png',
     scale: 1.0296,
-    fixX: 0,
-    fixZ: 0,
-    yawOffset: 90,
+    yawOffset: 0,
     flip: false,
   },
   {
@@ -34,9 +29,7 @@ const CREATURES: Creature[] = [
     url: './assets/ghost.glb',
     icon: './assets/ghost.png',
     scale: 0.9324,
-    fixX: 0,
-    fixZ: 0,
-    yawOffset: 90,
+    yawOffset: 0,
     flip: false,
   },
   {
@@ -44,9 +37,7 @@ const CREATURES: Creature[] = [
     url: './assets/halloween_pumpkin.glb',
     icon: './assets/pumpkin.png',
     scale: 0.0133,
-    fixX: 0,
-    fixZ: 0,
-    yawOffset: 90,
+    yawOffset: 0,
     flip: false,
   },
   {
@@ -54,9 +45,7 @@ const CREATURES: Creature[] = [
     url: './assets/happy_halloween_2021.glb',
     icon: './assets/halloween.png',
     scale: 0.0403,
-    fixX: 0,
-    fixZ: 0,
-    yawOffset: 90,
+    yawOffset: 0,
     flip: false,
   },
 ]

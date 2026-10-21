@@ -33,34 +33,26 @@ ecs.registerComponent({
       modelEntity.set(PinchToScale, {})
       modelEntity.set(TwistToRotate, {})
 
-      const pos = e.data.worldPosition
-      world.setPosition(root, pos.x, pos.y, pos.z)
-
-      ecs.PositionAnimation.set(world, root, {
+      ecs.PositionAnimation.set(world, model, {
         duration: 2000,
         loop: false,
-        fromX: pos.x,
-        fromY: pos.y - 2,
-        fromZ: pos.z,
-        toX: pos.x,
-        toY: pos.y,
-        toZ: pos.z,
+        fromY: -2,
+        toY: 0,
         easeOut: true,
         easingFunction: 'Elastic',
       })
 
+      const pos = e.data.worldPosition
+      world.setPosition(root, pos.x, pos.y, pos.z)
+
+      // Models render upright as-is; the only rotation is a world-Y yaw toward
+      // the camera, plus per-creature tuning (all zero by default).
       const camPos = world.transform.getWorldPosition(world.camera.getActiveEid())
       const faceYaw =
         Math.atan2(camPos.x - pos.x, camPos.z - pos.z) +
         (creature.yawOffset * Math.PI) / 180 +
         (creature.flip ? Math.PI : 0)
-
-      // Stand the model upright locally (tilt about X then Z), then yaw about
-      // the world Y axis to face the camera. Composition order: yaw * tilt.
-      const tilt = ecs.math.quat
-        .xRadians((creature.fixX * Math.PI) / 180)
-        .times(ecs.math.quat.zRadians((creature.fixZ * Math.PI) / 180))
-      const rootQuat = ecs.math.quat.yRadians(faceYaw).times(tilt)
+      const rootQuat = ecs.math.quat.yRadians(faceYaw)
       world.setQuaternion(root, rootQuat.x, rootQuat.y, rootQuat.z, rootQuat.w)
       world.setScale(model, creature.scale, creature.scale, creature.scale)
 
