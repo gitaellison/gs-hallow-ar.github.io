@@ -9,6 +9,8 @@ export interface Creature {
   // yawOffset biases that turn (degrees); flip adds 180 if it faces away.
   yawOffset: number
   flip: boolean
+  // Cast a dynamic shadow (false for models with a shadow baked into the glb).
+  castsShadow: boolean
 }
 
 const CAMERA_SVG =
@@ -23,6 +25,7 @@ const CREATURES: Creature[] = [
     scale: 1.0296,
     yawOffset: 0,
     flip: false,
+    castsShadow: true,
   },
   {
     label: 'Ghost',
@@ -31,6 +34,7 @@ const CREATURES: Creature[] = [
     scale: 0.9324,
     yawOffset: 0,
     flip: false,
+    castsShadow: false,
   },
   {
     label: 'Pumpkin',
@@ -39,6 +43,7 @@ const CREATURES: Creature[] = [
     scale: 0.0133,
     yawOffset: 0,
     flip: false,
+    castsShadow: true,
   },
   {
     label: 'Halloween',
@@ -47,6 +52,7 @@ const CREATURES: Creature[] = [
     scale: 0.0403,
     yawOffset: 90,
     flip: false,
+    castsShadow: true,
   },
 ]
 
@@ -64,6 +70,60 @@ export const markPlaced = (url: string) => {
 export const clearPlaced = () => {
   placedUrls.clear()
   refreshUI()
+}
+
+const ICON_SIZE = 96
+let iconRenderer: any = null
+
+// Render a static ("frozen") mini view of the glb into the button img.
+// Falls back silently to the png if the engine's THREE/GLTFLoader is absent.
+const renderGlbIcon = (creature: Creature, img: HTMLImageElement) => {
+  const THREE = (window as any).THREE
+  const LoaderCtor = THREE && THREE.GLTFLoader ? THREE.GLTFLoader : (window as any).GLTFLoader
+  if (!THREE || !LoaderCtor) return
+  try {
+    if (!iconRenderer) {
+      iconRenderer = new THREE.WebGLRenderer({antialias: true, preserveDrawingBuffer: true})
+      iconRenderer.setSize(ICON_SIZE, ICON_SIZE)
+    }
+    const loader = new LoaderCtor()
+    loader.load(
+      creature.url,
+      (gltf: any) => {
+        try {
+          const model = gltf.scene
+          model.rotation.y = ((creature.yawOffset + (creature.flip ? 180 : 0)) * Math.PI) / 180
+
+          const scene = new THREE.Scene()
+          scene.background = new THREE.Color(0x9a9a9a)
+          scene.add(model)
+          scene.add(new THREE.AmbientLight(0xffffff, 1.3))
+          const key = new THREE.DirectionalLight(0xffffff, 2.0)
+          key.position.set(1.2, 2, 1.5)
+          scene.add(key)
+
+          const box = new THREE.Box3().setFromObject(model)
+          const center = box.getCenter(new THREE.Vector3())
+          const size = box.getSize(new THREE.Vector3())
+          const maxDim = Math.max(size.x, size.y, size.z) || 1
+          model.position.sub(center)
+
+          const camera = new THREE.PerspectiveCamera(38, 1, maxDim / 100, maxDim * 30)
+          camera.position.set(0, maxDim * 0.25, maxDim * 2.6)
+          camera.lookAt(0, 0, 0)
+
+          iconRenderer.render(scene, camera)
+          img.src = iconRenderer.domElement.toDataURL('image/png')
+        } catch (err) {
+          console.warn('icon render failed', creature.url, err)
+        }
+      },
+      undefined,
+      (err) => console.warn('icon load failed', creature.url, err)
+    )
+  } catch (err) {
+    console.warn('icon renderer unavailable', err)
+  }
 }
 
 const buildPicker = () => {
@@ -135,6 +195,7 @@ const buildPicker = () => {
     } as Partial<CSSStyleDeclaration>)
     icon.src = creature.icon
     icon.alt = creature.label
+    setTimeout(() => renderGlbIcon(creature, icon), 1200 + i * 1500)
 
     const label = document.createElement('span')
     label.textContent = creature.label
