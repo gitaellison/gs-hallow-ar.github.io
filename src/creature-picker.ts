@@ -45,7 +45,7 @@ const CREATURES: Creature[] = [
     url: './assets/happy_halloween_2021.glb',
     icon: './assets/halloween.png',
     scale: 0.0403,
-    yawOffset: 0,
+    yawOffset: 90,
     flip: false,
   },
 ]
