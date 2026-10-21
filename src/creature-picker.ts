@@ -74,6 +74,64 @@ export const clearPlaced = () => {
   refreshUI()
 }
 
+const ICON_SIZE = 128
+let iconRenderer: any = null
+
+// Render a frozen mini 3D view of the creature's glb (transparent background)
+// into the button img. The png stays as fallback if loading/rendering fails.
+const renderGlbIcon = (creature: Creature, img: HTMLImageElement) => {
+  const THREE = (window as any).THREE
+  const LoaderCtor = THREE && THREE.GLTFLoader ? THREE.GLTFLoader : (window as any).GLTFLoader
+  if (!THREE || !LoaderCtor) return
+  try {
+    if (!iconRenderer) {
+      iconRenderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true,
+      })
+      iconRenderer.setSize(ICON_SIZE, ICON_SIZE)
+      iconRenderer.setClearColor(0x000000, 0)
+    }
+    const loader = new LoaderCtor()
+    loader.load(
+      creature.url,
+      (gltf: any) => {
+        try {
+          const model = gltf.scene
+          model.rotation.y = ((creature.yawOffset + (creature.flip ? 180 : 0)) * Math.PI) / 180
+
+          const scene = new THREE.Scene()
+          scene.add(model)
+          scene.add(new THREE.AmbientLight(0xffffff, 1.3))
+          const key = new THREE.DirectionalLight(0xffffff, 2.0)
+          key.position.set(1.2, 2, 1.5)
+          scene.add(key)
+
+          const box = new THREE.Box3().setFromObject(model)
+          const center = box.getCenter(new THREE.Vector3())
+          const size = box.getSize(new THREE.Vector3())
+          const maxDim = Math.max(size.x, size.y, size.z) || 1
+          model.position.sub(center)
+
+          const camera = new THREE.PerspectiveCamera(38, 1, maxDim / 100, maxDim * 30)
+          camera.position.set(0, maxDim * 0.25, maxDim * 2.6)
+          camera.lookAt(0, 0, 0)
+
+          iconRenderer.render(scene, camera)
+          img.src = iconRenderer.domElement.toDataURL('image/png')
+        } catch (err) {
+          console.warn('icon render failed', creature.url, err)
+        }
+      },
+      undefined,
+      (err) => console.warn('icon load failed', creature.url, err)
+    )
+  } catch (err) {
+    console.warn('icon renderer unavailable', err)
+  }
+}
+
 const buildPicker = () => {
   const bar = document.createElement('div')
   Object.assign(bar.style, {
@@ -143,6 +201,7 @@ const buildPicker = () => {
     } as Partial<CSSStyleDeclaration>)
     icon.src = creature.icon
     icon.alt = creature.label
+    setTimeout(() => renderGlbIcon(creature, icon), 1200 + i * 1500)
 
     const label = document.createElement('span')
     label.textContent = creature.label
