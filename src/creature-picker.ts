@@ -52,6 +52,7 @@ const CREATURES: Creature[] = [
 
 let selectedIndex = 0
 const placedUrls = new Set<string>()
+const placedEids = new Map<string, bigint>()
 let refreshUI: () => void = () => {}
 let pickerBar: HTMLDivElement | null = null
 
@@ -61,8 +62,15 @@ export const markPlaced = (url: string) => {
   placedUrls.add(url)
   refreshUI()
 }
+export const setPlacedEid = (url: string, eid: bigint) => {
+  placedEids.set(url, eid)
+}
+export const getPlacedEid = (url: string): bigint | null => {
+  return placedEids.has(url) ? (placedEids.get(url) as bigint) : null
+}
 export const clearPlaced = () => {
   placedUrls.clear()
+  placedEids.clear()
   refreshUI()
 }
 
