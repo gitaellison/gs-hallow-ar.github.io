@@ -27,7 +27,7 @@ ecs.registerComponent({
       const model = world.createEntity()
       const modelEntity = world.getEntity(model)
       modelEntity.setParent(root)
-      modelEntity.set(ecs.Shadow, {castShadow: creature.castsShadow, receiveShadow: false})
+      modelEntity.set(ecs.Shadow, {castShadow: true, receiveShadow: false})
       modelEntity.set(ecs.GltfModel, {url: creature.url, animationClip: '', loop: true})
       modelEntity.set(DragToMove, {})
       modelEntity.set(PinchToScale, {})

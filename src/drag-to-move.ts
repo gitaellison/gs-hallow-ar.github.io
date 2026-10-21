@@ -31,7 +31,8 @@ const DragToMove = ecs.registerComponent({
       })
       .listen(eid, ecs.input.SCREEN_TOUCH_START, (e) => {
         const camera = world.three.activeCamera
-        if (activePointerId !== null || !camera) return
+        const THREE = (window as any).THREE
+        if (activePointerId !== null || !e.data.worldPosition || !camera || !THREE) return
         activePointerId = e.data.pointerId
         setActiveCreature(eid)
 
@@ -41,11 +42,7 @@ const DragToMove = ecs.registerComponent({
           grabOffset = ecs.math.vec3.zero()
           return
         }
-        grabOffset = ecs.math.vec3.xyz(
-          objPos.x - grabPoint.x,
-          objPos.y - grabPoint.y,
-          objPos.z - grabPoint.z
-        )
+        grabOffset = ecs.math.vec3.xyz(objPos.x - grabPoint.x, objPos.y - grabPoint.y, objPos.z - grabPoint.z)
       })
       .listen(eid, ecs.input.SCREEN_TOUCH_MOVE, (e) => {
         const camera = world.three.activeCamera
